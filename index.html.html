@@ -1,0 +1,854 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#A32D2D;--red-l:#FCEBEB;--red-m:#F09595;
+  --green:#27500A;--green-l:#EAF3DE;--green-m:#97C459;
+  --amber:#633806;--amber-l:#FAEEDA;--amber-m:#EF9F27;
+  --blue:#0C447C;--blue-l:#E6F1FB;--blue-m:#85B7EB;
+  --purple:#3C3489;--purple-l:#EEEDFE;--purple-m:#AFA9EC;
+  --teal:#085041;--teal-l:#E1F5EE;--teal-m:#5DCAA5;
+}
+.app{max-width:500px;margin:0 auto;padding:.5rem 0 2rem;font-family:var(--font-sans)}
+
+/* NAV TABS */
+.nav-tabs{display:flex;border-bottom:.5px solid var(--color-border-tertiary);margin-bottom:12px;gap:0}
+.nav-tab{flex:1;padding:8px 4px;font-size:12px;font-weight:500;text-align:center;border:none;background:none;cursor:pointer;font-family:var(--font-sans);color:var(--color-text-secondary);border-bottom:2px solid transparent;transition:all .15s}
+.nav-tab.on{color:var(--red);border-bottom-color:var(--red)}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;gap:8px;padding:0 0 10px;border-bottom:.5px solid var(--color-border-tertiary);margin-bottom:10px}
+.hdr-logo{width:36px;height:36px;border-radius:10px;background:var(--red-l);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.hdr-title{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.hdr-sub{font-size:11px;color:var(--color-text-secondary)}
+.lang-sw{margin-left:auto;display:flex;border:.5px solid var(--color-border-secondary);border-radius:8px;overflow:hidden;flex-shrink:0}
+.lbtn{padding:3px 9px;font-size:11px;font-weight:500;border:none;cursor:pointer;font-family:var(--font-sans);background:var(--color-background-primary);color:var(--color-text-secondary)}
+.lbtn.on{background:var(--red);color:#FCEBEB}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-bottom:8px}
+.stat{background:var(--color-background-secondary);border-radius:8px;padding:7px 4px;text-align:center}
+.stat-n{font-size:17px;font-weight:500;line-height:1}
+.stat-l{font-size:9px;color:var(--color-text-secondary);margin-top:2px}
+.prog-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.prog-bg{flex:1;background:var(--color-background-secondary);border-radius:999px;height:4px;overflow:hidden}
+.prog-fill{height:4px;border-radius:999px;background:var(--red);transition:width .5s}
+
+/* DAILY CHALLENGE CARD */
+.dc-card{background:var(--color-background-primary);border:2px solid var(--red);border-radius:14px;overflow:hidden;margin-bottom:10px;position:relative}
+.dc-header{background:var(--red);padding:10px 14px;display:flex;align-items:center;gap:8px}
+.dc-title-text{font-size:13px;font-weight:500;color:#FCEBEB;flex:1}
+.dc-date{font-size:11px;color:#F09595}
+.dc-streak-badge{background:rgba(255,255,255,.15);border-radius:999px;padding:2px 8px;font-size:11px;color:#FCEBEB;font-weight:500}
+
+/* TIMER RING */
+.timer-wrap{display:flex;flex-direction:column;align-items:center;padding:14px 14px 8px}
+.timer-ring-container{position:relative;width:72px;height:72px;margin-bottom:8px}
+.timer-svg{transform:rotate(-90deg)}
+.timer-track{fill:none;stroke:var(--color-background-secondary);stroke-width:5}
+.timer-fill{fill:none;stroke:var(--red);stroke-width:5;stroke-linecap:round;stroke-dasharray:201;stroke-dashoffset:0;transition:stroke-dashoffset .9s linear,stroke .3s}
+.timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;color:var(--color-text-primary)}
+.dc-sit{font-size:13px;color:var(--color-text-secondary);line-height:1.7;padding:0 14px 10px;text-align:center}
+
+/* CHOICE BUTTONS — game feel */
+.choices{display:flex;flex-direction:column;gap:6px;padding:0 14px 14px}
+.choice{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;border:1.5px solid var(--color-border-secondary);background:var(--color-background-primary);cursor:pointer;font-family:var(--font-sans);text-align:left;transition:all .15s;width:100%}
+.choice:hover:not(:disabled){border-color:var(--color-border-primary);background:var(--color-background-secondary)}
+.choice-key{width:28px;height:28px;border-radius:8px;background:var(--color-background-secondary);border:.5px solid var(--color-border-secondary);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;color:var(--color-text-secondary);transition:all .15s}
+.choice-text{font-size:13px;color:var(--color-text-primary);line-height:1.5;padding-top:1px}
+.choice-icon{font-size:14px;margin-left:auto;flex-shrink:0;opacity:0;transition:opacity .2s;padding-top:2px}
+.choice.correct{border-color:#639922;background:var(--green-l)}
+.choice.correct .choice-key{background:#639922;color:#fff;border-color:#639922}
+.choice.correct .choice-icon{opacity:1}
+.choice.wrong{border-color:#E24B4A;background:var(--red-l)}
+.choice.wrong .choice-key{background:#E24B4A;color:#fff;border-color:#E24B4A}
+.choice.wrong .choice-icon{opacity:1}
+.choice.partial{border-color:#BA7517;background:var(--amber-l)}
+.choice.partial .choice-key{background:#BA7517;color:#fff;border-color:#BA7517}
+.choice.partial .choice-icon{opacity:1}
+.choice:disabled{cursor:default}
+
+/* RESULT BANNER */
+.result-banner{display:flex;align-items:center;gap:10px;padding:10px 14px;margin:0 14px 10px;border-radius:10px}
+.result-icon-big{font-size:24px;flex-shrink:0}
+.result-title{font-size:14px;font-weight:500}
+.result-pts{font-size:12px;margin-top:2px}
+
+/* CONFLICT GRID */
+.analysis-wrap{padding:0 14px 6px;display:flex;flex-direction:column;gap:8px}
+.section-label{font-size:10px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;display:flex;align-items:center;gap:5px}
+.prin-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.prin-chip{display:flex;align-items:center;gap:7px;padding:7px 9px;border-radius:9px;border:.5px solid transparent}
+.prin-chip.ok{background:var(--green-l);border-color:#97C459}
+.prin-chip.fail{background:var(--red-l);border-color:var(--red-m)}
+.prin-chip.conflict{background:var(--amber-l);border-color:var(--amber-m)}
+.prin-icon{font-size:15px;flex-shrink:0}
+.prin-name{font-size:11px;font-weight:500}
+.prin-chip.ok .prin-name{color:var(--green)}
+.prin-chip.fail .prin-name{color:var(--red)}
+.prin-chip.conflict .prin-name{color:var(--amber)}
+.prin-verdict{font-size:10px;margin-top:1px}
+.prin-chip.ok .prin-verdict{color:#3B6D11}
+.prin-chip.fail .prin-verdict{color:#A32D2D}
+.prin-chip.conflict .prin-verdict{color:#854F0B}
+
+.conflict-alert{background:var(--amber-l);border:.5px solid var(--amber-m);border-radius:9px;padding:9px 11px;font-size:12px;color:var(--amber);line-height:1.65;display:flex;gap:7px}
+.why-box{background:var(--color-background-secondary);border-radius:9px;padding:9px 11px;font-size:12px;color:var(--color-text-secondary);line-height:1.7;display:flex;gap:7px}
+.law-box{background:var(--blue-l);border:.5px solid var(--blue-m);border-radius:9px;padding:9px 11px}
+.law-row{font-size:12px;color:var(--blue);line-height:1.6;display:flex;gap:5px}
+.law-row::before{content:"§";flex-shrink:0;opacity:.5}
+.real-box{background:var(--purple-l);border:.5px solid var(--purple-m);border-radius:9px;padding:9px 11px}
+.real-item{display:flex;align-items:flex-start;gap:7px;font-size:12px;color:var(--purple);line-height:1.6;margin-bottom:3px;cursor:pointer}
+.chkbox{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--purple-m);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .15s}
+.chkbox.on{background:var(--purple);border-color:var(--purple);color:#fff}
+
+/* QUIZ */
+.quiz-wrap{padding:0 14px 14px}
+.quiz-q{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:10px;line-height:1.5}
+.qopts{display:flex;flex-direction:column;gap:5px}
+.qopt{display:flex;align-items:center;gap:8px;padding:8px 11px;border-radius:9px;border:1.5px solid var(--color-border-secondary);background:var(--color-background-primary);cursor:pointer;font-family:var(--font-sans);font-size:12px;color:var(--color-text-primary);transition:all .15s;text-align:left;width:100%}
+.qopt:hover:not(:disabled){border-color:var(--color-border-primary);background:var(--color-background-secondary)}
+.qopt.qok{border-color:#639922;background:var(--green-l);color:var(--green)}
+.qopt.qfail{border-color:#E24B4A;background:var(--red-l);color:var(--red)}
+.quiz-fb{margin-top:8px;font-size:12px;color:var(--color-text-secondary);line-height:1.6;padding:8px 10px;border-radius:8px;background:var(--color-background-secondary)}
+
+/* NAV BTNS */
+.nav-row{display:flex;gap:6px;padding:10px 14px;border-top:.5px solid var(--color-border-tertiary)}
+.nbtn{flex:1;padding:9px;font-size:12px;font-weight:500;border-radius:8px;border:.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-secondary);cursor:pointer;font-family:var(--font-sans);transition:all .15s}
+.nbtn.primary{background:var(--red);color:#FCEBEB;border-color:var(--red)}
+.nbtn:hover{background:var(--color-background-primary)}
+.nbtn.primary:hover{background:#791F1F}
+
+/* STEP INDICATOR */
+.steps{display:flex;border-bottom:.5px solid var(--color-border-tertiary)}
+.step{flex:1;padding:7px 4px;text-align:center;font-size:10px;font-weight:500;color:var(--color-text-tertiary)}
+.step-dot{width:18px;height:18px;border-radius:50%;background:var(--color-background-secondary);border:.5px solid var(--color-border-secondary);display:flex;align-items:center;justify-content:center;font-size:10px;margin:0 auto 2px}
+.step.done{color:var(--green)}.step.done .step-dot{background:var(--green-l);border-color:#639922;color:var(--green)}
+.step.active{color:var(--red)}.step.active .step-dot{background:var(--red-l);border-color:var(--red);color:var(--red)}
+
+/* MENU */
+.menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:14px}
+.mc{background:var(--color-background-secondary);border:.5px solid var(--color-border-tertiary);border-radius:10px;padding:10px 12px;cursor:pointer;transition:all .15s}
+.mc:hover{background:var(--color-background-primary);border-color:var(--color-border-primary)}
+.mc-num{font-size:10px;color:var(--color-text-tertiary);margin-bottom:2px}
+.mc-ttl{font-size:12px;font-weight:500;color:var(--color-text-primary);line-height:1.4}
+.mc-cat{font-size:10px;padding:1px 7px;border-radius:999px;margin-top:4px;display:inline-block}
+.search-box{display:flex;align-items:center;gap:6px;background:var(--color-background-secondary);border:.5px solid var(--color-border-secondary);border-radius:10px;padding:8px 12px;margin:0 14px 4px}
+.srch-inp{flex:1;border:none;background:transparent;font-size:13px;font-family:var(--font-sans);color:var(--color-text-primary);outline:none}
+.srch-hint{font-size:11px;color:var(--color-text-tertiary);padding:2px 14px 10px}
+.cat-tabs{display:flex;flex-wrap:wrap;gap:4px;padding:0 14px 8px}
+.ctab{font-size:11px;padding:3px 9px;border-radius:999px;border:.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-secondary);cursor:pointer;font-family:var(--font-sans);transition:all .15s}
+.ctab.on{background:var(--red);color:#FCEBEB;border-color:var(--red)}
+
+/* DASHBOARD */
+.dash{padding:0 0 10px}
+.dash-title{font-size:13px;font-weight:500;color:var(--color-text-primary);padding:0 0 8px;display:flex;align-items:center;gap:6px}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:12px}
+.kpi{background:var(--color-background-secondary);border-radius:10px;padding:10px 8px;text-align:center}
+.kpi-n{font-size:20px;font-weight:500}
+.kpi-l{font-size:10px;color:var(--color-text-secondary);margin-top:2px;line-height:1.3}
+.bar-chart{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.bar-row{display:flex;align-items:center;gap:8px}
+.bar-label{font-size:11px;color:var(--color-text-secondary);width:130px;flex-shrink:0;line-height:1.3}
+.bar-track{flex:1;background:var(--color-background-secondary);border-radius:999px;height:8px;overflow:hidden}
+.bar-fill{height:8px;border-radius:999px;transition:width .8s}
+.bar-pct{font-size:11px;color:var(--color-text-secondary);width:34px;text-align:right;flex-shrink:0}
+.insight-card{border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:12px;line-height:1.65;display:flex;gap:8px}
+.badge-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.badge-card{border-radius:10px;padding:8px 12px;flex:1;min-width:100px;text-align:center}
+.badge-icon{font-size:20px;margin-bottom:4px}
+.badge-name{font-size:11px;font-weight:500;margin-bottom:2px}
+.badge-count{font-size:10px;opacity:.7}
+.safety{background:var(--green-l);border:.5px solid var(--green-m);border-radius:8px;padding:6px 10px;font-size:11px;color:var(--green);margin-bottom:8px;display:flex;gap:5px}
+
+/* TIMER ANIMATION */
+@keyframes pulse-red{0%,100%{opacity:1}50%{opacity:.6}}
+.timer-urgent .timer-fill{stroke:#E24B4A;animation:pulse-red .5s ease-in-out infinite}
+.timer-urgent .timer-num{color:#E24B4A}
+</style>
+
+<h2 class="sr-only">EthiBot Nurse Final — Daily Challenge with countdown, full scenario system, and analytics dashboard</h2>
+
+<div class="app">
+  <div class="hdr">
+    <div class="hdr-logo">🏥</div>
+    <div><div class="hdr-title">EthiBot Nurse</div><div class="hdr-sub">CMU Nursing Ethics · Final Edition</div></div>
+    <div class="lang-sw">
+      <button class="lbtn on" id="btn-th" onclick="setLang('th')">TH</button>
+      <button class="lbtn" id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-n" id="s-score" style="color:#A32D2D">0</div><div class="stat-l">Score</div></div>
+    <div class="stat"><div class="stat-n" id="s-done" style="color:#185FA5">0/8</div><div class="stat-l">Done</div></div>
+    <div class="stat"><div class="stat-n" id="s-streak" style="color:#BA7517">0🔥</div><div class="stat-l">Streak</div></div>
+    <div class="stat" id="s-badge"><div class="stat-n" style="font-size:10px;color:var(--color-text-tertiary)">—</div><div class="stat-l">Badge</div></div>
+  </div>
+  <div class="prog-row">
+    <div class="prog-bg"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+    <span style="font-size:11px;color:var(--color-text-secondary)" id="prog-txt">0%</span>
+  </div>
+
+  <div class="nav-tabs">
+    <button class="nav-tab on" onclick="switchTab('daily')">🎯 Daily Challenge</button>
+    <button class="nav-tab" onclick="switchTab('explore')">📚 Explore</button>
+    <button class="nav-tab" onclick="switchTab('dashboard')">📊 Dashboard</button>
+  </div>
+
+  <div id="tab-daily"></div>
+  <div id="tab-explore" style="display:none"></div>
+  <div id="tab-dashboard" style="display:none"></div>
+</div>
+
+<script>
+let lang='th',curTab='daily',curSc=null,uiStep=0,pickedIdx=null;
+let timerInt=null,timerSec=60,timerActive=false;
+const st={score:0,done:0,streak:0,ids:new Set(),wrongIds:new Set()};
+
+const CAT={clinical:{th:'คลินิก',en:'Clinical',bg:'#E6F1FB',fg:'#0C447C'},digital:{th:'ดิจิทัล',en:'Digital',bg:'#FAEEDA',fg:'#854F0B'},family:{th:'ญาติผู้ป่วย',en:'Family',bg:'#EAF3DE',fg:'#27500A'},team:{th:'ทีมสุขภาพ',en:'Team',bg:'#FCEBEB',fg:'#A32D2D'},legal:{th:'กฎหมาย',en:'Legal',bg:'#EEEDFE',fg:'#3C3489'}};
+
+const SC=[
+  {id:1,cat:'digital',correct:2,scores:[0,5,10],
+   conflict:{au:[false,true,true],be:[false,true,true],nm:[false,true,true],ju:[true,true,true]},
+   conflictNote:{th:'⚡ Conflict: Fidelity ✖ ชัดเจน vs Autonomy ✔ ถ้า consent — แต่ Non-maleficence ยังเสี่ยง นี่คือ ethical tension จริงในสังคมออนไลน์',en:'⚡ Conflict: Fidelity ✖ clearly vs Autonomy ✔ with consent — but Non-maleficence still at risk. Real ethical tension in digital nursing.'},
+   th:{title:'โพสต์รูปแผลผู้ป่วย',emoji:'📸',
+     sit:'คุณถ่ายรูปแผลผู้ป่วยหลังผ่าตัดและกำลังจะโพสต์ลง Instagram พร้อม #NursingLife โดยไม่บลัร์ป้ายชื่อโรงพยาบาล',
+     c:['โพสต์ได้เลย ไม่เห็นหน้าผู้ป่วย','ขอ consent ผู้ป่วยก่อนโพสต์','ไม่โพสต์เลย ยังมีข้อมูลระบุตัวตน'],
+     icons:['❌','⚠️','✅'],
+     why:['❌ ป้ายชื่อโรงพยาบาล + ลักษณะแผลระบุตัวตนได้ Risk: ถูกฟ้องร้อง เพิกถอนใบอนุญาต','⚠️ Consent เพียงอย่างเดียวไม่ครอบคลุมข้อมูลระบุตัวตนทั้งหมดในรูป','✅ Fidelity กำหนดชัดว่าห้ามโพสต์ข้อมูลผู้ป่วยทุกรูปแบบบนโซเชียล'],
+     laws:['พ.ร.บ.สุขภาพแห่งชาติ 2550 มาตรา 7','พ.ร.บ.คอมพิวเตอร์ — เผยแพร่ข้อมูลส่วนบุคคล','จรรยาบรรณพยาบาล — Fidelity'],
+     real:['🔔 แจ้งหัวหน้าหากเห็นเพื่อนกำลังโพสต์','🗑️ ลบรูปและตรวจสอบอัลบั้มทั้งหมด','📝 บันทึกว่าได้แจ้งเตือนแล้ว'],
+     qQ:'ส่งรูปแผลผู้ป่วยใน LINE กลุ่มเพื่อน "เพื่อการศึกษา" ผิดจรรยาบรรณไหม?',
+     qO:['ไม่ผิด เพราะเป็นการศึกษา','ผิด เพราะเผยแพร่ข้อมูลผู้ป่วย','ขึ้นอยู่กับว่าบลัร์หน้าไหม'],qC:1},
+   en:{title:'Posting Patient Wound Photo',emoji:'📸',
+     sit:'You photograph a post-surgical wound and are about to post on Instagram with #NursingLife without blurring the hospital name tag.',
+     c:['Post it — face not visible','Get patient consent first','Don\'t post — identifiable info still visible'],
+     icons:['❌','⚠️','✅'],
+     why:['❌ Hospital badge + wound characteristics can identify the patient. Risk: lawsuit, license revocation.','⚠️ Consent alone doesn\'t cover all identifiable elements in the image.','✅ Fidelity principle: no patient info on social media — no exceptions.'],
+     laws:['National Health Act 2007 Section 7','Computer Crime Act — personal data sharing','Nursing Code of Ethics — Fidelity'],
+     real:['🔔 Alert supervisor if colleague about to post','🗑️ Delete photos, check entire album','📝 Document that you reported the concern'],
+     qQ:'Sending a patient wound photo to a LINE study group "for education" — ethical breach?',
+     qO:['No — educational use','Yes — sharing patient information','Depends if face is blurred'],qC:1}},
+
+  {id:2,cat:'clinical',correct:1,scores:[0,10,5],
+   conflict:{au:[false,true,true],be:[false,true,true],nm:[false,true,false],ju:[false,true,true]},
+   conflictNote:{th:'⚡ Conflict: Autonomy ผู้ป่วย (สิทธิรับข้อมูลครบ) ✔ ปะทะ Role Boundary (นักศึกษาไม่มีอำนาจ) ✖ — สิทธิผู้ป่วยชนะเสมอ',en:'⚡ Conflict: Patient Autonomy (right to full info) ✔ vs Role Boundary (student has no authority) ✖ — patient rights always prevail.'},
+   th:{title:'Informed Consent โดยนักศึกษา',emoji:'📋',
+     sit:'แพทย์ยุ่งมาก ขอให้คุณ (นักศึกษาพยาบาล) อธิบายขั้นตอนผ่าตัดและรับเซ็น consent form แทน',
+     c:['ทำได้เลย แพทย์มอบหมาย','ปฏิเสธ และชี้แจงว่าไม่ใช่หน้าที่นักศึกษา','อธิบายเบื้องต้นได้ ให้แพทย์รับเซ็นเอง'],
+     icons:['❌','✅','⚠️'],
+     why:['❌ นักศึกษาไม่มีใบอนุญาต ไม่มีอำนาจตามกฎหมาย Risk: ถ้าเกิดความเสียหาย นักศึกษาและสถาบันรับผิดร่วม','✅ ปกป้อง Autonomy ผู้ป่วย ผู้ป่วยมีสิทธิรับข้อมูลจากผู้มีอำนาจตามกฎหมาย','⚠️ ผู้ป่วยอาจเซ็นโดยไม่เข้าใจขั้นตอนจริง'],
+     laws:['พ.ร.บ.สถานพยาบาล — แพทย์มีหน้าที่อธิบาย','หลัก Autonomy — สิทธิผู้ป่วยรับข้อมูลครบ','ขอบเขตปฏิบัติของนักศึกษาพยาบาล'],
+     real:['🗣️ แจ้งแพทย์ว่าไม่สามารถรับ consent ได้','📝 บันทึกการปฏิเสธและเหตุผล','📢 รายงานหัวหน้าถ้าแพทย์ยังยืนยัน'],
+     qQ:'นักศึกษาพยาบาลรับ informed consent แทนแพทย์ได้ไหม?',
+     qO:['ได้ ถ้าแพทย์มอบหมาย','ไม่ได้ เป็นหน้าที่แพทย์','ได้ ถ้าผู้ป่วยเซ็นแล้ว'],qC:1},
+   en:{title:'Informed Consent by Student',emoji:'📋',
+     sit:'A busy physician asks you (nursing student) to explain the procedure and obtain the signed consent form.',
+     c:['Do it — doctor delegated','Refuse — not a student\'s role','Explain basics, let doctor sign'],
+     icons:['❌','✅','⚠️'],
+     why:['❌ Students have no license or legal authority. Risk: if harm occurs, student and institution share liability.','✅ Protects patient Autonomy — patient has the right to information from a licensed professional.','⚠️ Patient may sign without truly understanding the procedure.'],
+     laws:['Medical Facility Act — physician must explain','Autonomy — patient\'s right to full information','Scope of nursing student practice'],
+     real:['🗣️ Tell physician you cannot obtain consent','📝 Document your refusal and reason','📢 Report to supervisor if physician insists'],
+     qQ:'Can a nursing student obtain informed consent on behalf of a physician?',
+     qO:['Yes if delegated','No — physician\'s duty','Yes if patient signs'],qC:1}},
+
+  {id:3,cat:'clinical',correct:1,scores:[0,10,7],
+   conflict:{au:[true,true,true],be:[false,true,true],nm:[false,true,false],ju:[false,true,true]},
+   conflictNote:{th:'⚡ Conflict: Accountability (ต้องรายงาน) ✔ ปะทะ Team Loyalty (กลัวทำให้เพื่อนเดือดร้อน) — แต่ Non-maleficence ผู้ป่วยมาก่อนเสมอ',en:'⚡ Conflict: Accountability (must report) ✔ vs Team Loyalty (fear of implicating colleague) — but patient Non-maleficence always comes first.'},
+   th:{title:'รายงานความผิดพลาดทางยา',emoji:'💊',
+     sit:'คุณสังเกตว่าเพื่อนพยาบาลให้ยาผิดขนาดกับผู้ป่วย แต่ผู้ป่วยยังไม่มีอาการผิดปกติ',
+     c:['ไม่บอกใคร เพราะผู้ป่วยยังปกติดี','รายงานหัวหน้าพยาบาลทันที','บอกเพื่อนก่อน ให้เพื่อนรายงานเอง'],
+     icons:['❌','✅','⚠️'],
+     why:['❌ ความผิดพลาดอาจมีผลเสียในภายหลัง การนิ่งเฉยละเมิด Non-maleficence โดยตรง','✅ ต้องรายงานทันทีเพื่อความปลอดภัยผู้ป่วย — นี่คือ Moral Courage','⚠️ ดีกว่าข้อ A แต่ควรรายงานเองด้วยเพื่อให้แน่ใจว่าข้อมูลถูกต้อง'],
+     laws:['พ.ร.บ.วิชาชีพการพยาบาลฯ มาตรา 31','หลัก Non-maleficence — ป้องกันอันตราย','มาตรฐานการรายงานความผิดพลาดทางการแพทย์'],
+     real:['🚨 รายงานหัวหน้าทันที','📝 บันทึก: เวลา ยา ขนาดที่ให้จริง','🔍 ติดตามอาการผู้ป่วยอย่างใกล้ชิด'],
+     qQ:'พบว่าเพื่อนให้ยาผิดขนาด สิ่งแรกที่ถูกต้องคืออะไร?',
+     qO:['สังเกตอาการผู้ป่วยก่อน','รายงานหัวหน้าทันที','บอกเพื่อนให้รายงานเอง'],qC:1},
+   en:{title:'Reporting Medication Error',emoji:'💊',
+     sit:'You notice a colleague administered the wrong medication dose. The patient shows no symptoms yet.',
+     c:['Say nothing — patient seems fine','Report to head nurse immediately','Tell colleague first, let them report'],
+     icons:['❌','✅','⚠️'],
+     why:['❌ Delayed effects may occur; silence directly violates Non-maleficence.','✅ Immediate reporting is mandatory for patient safety — this is Moral Courage.','⚠️ Better than A, but you should also confirm the report was properly made.'],
+     laws:['Nursing Profession Act Section 31','Non-maleficence — prevent patient harm','Medical error reporting standards'],
+     real:['🚨 Report to supervisor immediately','📝 Document: time, medication, actual dose given','🔍 Monitor patient closely for any changes'],
+     qQ:'You discover a colleague gave the wrong medication dose. Your FIRST action:',
+     qO:['Monitor patient symptoms first','Report to head nurse immediately','Tell colleague to self-report'],qC:1}},
+
+  {id:4,cat:'family',correct:1,scores:[0,10,7],
+   conflict:{au:[false,true,true],be:[true,true,true],nm:[false,true,true],ju:[false,true,true]},
+   conflictNote:{th:'⚡ Classic conflict: Autonomy ผู้ป่วย (ไม่อยากให้ลูกรู้) ✔ ปะทะ Beneficence ครอบครัว (ครอบครัวช่วยดูแลได้ดีกว่า) ✔ — Autonomy ผู้ป่วยชนะเสมอตามกฎหมาย',en:'⚡ Classic conflict: Patient Autonomy (don\'t tell children) ✔ vs Family Beneficence (family can help better) ✔ — Patient Autonomy always prevails legally.'},
+   th:{title:'เปิดเผยข้อมูลให้ลูก',emoji:'👨‍👩‍👧',
+     sit:'ลูกของผู้ป่วยขอทราบผลวินิจฉัยมะเร็งของแม่ แต่แม่บอกว่าไม่ต้องการให้ลูกรู้',
+     c:['บอกลูก เพราะครอบครัวต้องรู้','ไม่บอก เคารพความประสงค์ผู้ป่วย','บอกให้แพทย์จัดการ'],
+     icons:['❌','✅','⚠️'],
+     why:['❌ ละเมิด Autonomy และ Fidelity ผู้ป่วย Risk: ผู้ป่วยสูญเสียความไว้ใจ อาจฟ้องร้องได้','✅ ข้อมูลสุขภาพเป็นของผู้ป่วย เธอมีสิทธิกำหนดว่าใครรู้ แม้เป็นลูก','⚠️ พยาบาลเองก็มีหน้าที่เคารพความประสงค์นี้ ไม่ใช่โยนให้แพทย์อย่างเดียว'],
+     laws:['พ.ร.บ.สุขภาพแห่งชาติ มาตรา 7','หลัก Autonomy + Fidelity','PDPA — ความยินยอมในการเปิดเผยข้อมูล'],
+     real:['🗣️ แจ้งลูกสุภาพว่าต้องคุยกับผู้ป่วยโดยตรง','📝 บันทึกความประสงค์ผู้ป่วยในเวชระเบียน','👨‍⚕️ แจ้งแพทย์เพื่อช่วยสื่อสารกับครอบครัว'],
+     qQ:'ข้อมูลสุขภาพของผู้ป่วยเป็นของใคร?',
+     qO:['ครอบครัวและผู้ป่วยร่วมกัน','ผู้ป่วยเท่านั้น','โรงพยาบาลและผู้ป่วย'],qC:1},
+   en:{title:'Disclosing Diagnosis to Family',emoji:'👨‍👩‍👧',
+     sit:'A patient\'s child asks about their mother\'s cancer diagnosis. The mother asked you not to tell her children.',
+     c:['Tell the child — family needs to know','Don\'t tell — respect patient\'s wishes','Let the doctor handle it'],
+     icons:['❌','✅','⚠️'],
+     why:['❌ Violates Autonomy and Fidelity. Risk: patient loses trust, possible lawsuit.','✅ Health information belongs to the patient — she decides who knows, even if it\'s her child.','⚠️ Nurses also have a duty to uphold this — can\'t simply offload to the doctor.'],
+     laws:['National Health Act Section 7','Autonomy + Fidelity','PDPA — consent for disclosure'],
+     real:['🗣️ Politely direct family to speak with patient','📝 Document patient\'s wishes in medical record','👨‍⚕️ Inform physician to assist with family communication'],
+     qQ:'Who does a patient\'s health information belong to?',
+     qO:['Family and patient jointly','The patient alone','Hospital and patient'],qC:1}},
+
+  {id:5,cat:'team',correct:1,scores:[3,10,0],
+   conflict:{au:[true,true,true],be:[false,true,true],nm:[false,true,false],ju:[false,true,false]},
+   conflictNote:{th:'⚡ Conflict: Accountability (ต้องพูด) ✔ ปะทะ Cooperation (ต้องทำงานร่วมกัน) — Moral Courage = พูดด้วยความเคารพ ไม่ใช่เลือกอย่างใดอย่างหนึ่ง',en:'⚡ Conflict: Accountability (must speak up) ✔ vs Cooperation (must work together) — Moral Courage = speak respectfully, not choose one over the other.'},
+   th:{title:'ขัดแย้งกับคำสั่งแพทย์',emoji:'⚕️',
+     sit:'แพทย์สั่งยาในขนาดที่คุณเชื่อว่าสูงเกินและอาจเป็นอันตราย แต่แพทย์ยืนยันคำสั่งเดิม',
+     c:['ให้ยาตามคำสั่งทันที','แจ้งข้อกังวลอีกครั้ง บันทึก ยกระดับถ้าจำเป็น','ปฏิเสธให้ยาโดยไม่บอกใคร'],
+     icons:['⚠️','✅','❌'],
+     why:['⚠️ พยาบาลมีหน้าที่ตั้งคำถามคำสั่งที่ไม่ปลอดภัย Risk: ถ้าผู้ป่วยเสียหาย พยาบาลรับผิดร่วม','✅ Moral Courage — พูด บันทึก ยกระดับตามสาย ปกป้องผู้ป่วยอย่างเป็นระบบ','❌ ปฏิเสธโดยไม่สื่อสาร = สุญญากาศการรักษา ผู้ป่วยยังเสี่ยงอยู่'],
+     laws:['หลัก Non-maleficence — ป้องกันอันตราย','ความรับผิดชอบทางวิชาชีพพยาบาล','มาตรฐานการสื่อสารในทีมสุขภาพ'],
+     real:['💬 แจ้งข้อกังวลกับแพทย์อีกครั้งอย่างชัดเจน','📝 บันทึก: วันเวลา คำสั่ง ข้อกังวลที่แสดง','📢 ยกระดับถึงหัวหน้าถ้ายังไม่ได้รับการแก้ไข'],
+     qQ:'Moral Courage ในวิชาชีพพยาบาลหมายถึงอะไร?',
+     qO:['ความกล้าทำตามคำสั่ง','ความกล้าพูดในสิ่งที่ถูกต้องแม้เสี่ยง','ความกล้าเผชิญผู้ป่วยวิกฤต'],qC:1},
+   en:{title:'Disagreeing with Doctor\'s Order',emoji:'⚕️',
+     sit:'A doctor orders what you believe is a dangerously high medication dose and confirms the order when you question it.',
+     c:['Give medication immediately','Express concern, document, escalate if needed','Refuse without telling anyone'],
+     icons:['⚠️','✅','❌'],
+     why:['⚠️ Nurses have a duty to question unsafe orders. Risk: if harm occurs, nurse shares liability.','✅ Moral Courage — speak up, document, escalate through proper channels.','❌ Silent refusal creates a care vacuum — patient remains at risk regardless.'],
+     laws:['Non-maleficence — prevent patient harm','Nurse\'s professional accountability','Healthcare team communication standards'],
+     real:['💬 Clearly restate your concern to the doctor','📝 Document: time, order, concern expressed','📢 Escalate to supervisor if unresolved'],
+     qQ:'Moral Courage in nursing means:',
+     qO:['Courage to follow orders','Courage to speak the right thing even when risky','Courage to face critical patients'],qC:1}},
+
+  {id:6,cat:'digital',correct:1,scores:[0,10,3],
+   conflict:{au:[false,true,false],be:[false,true,false],nm:[false,true,false],ju:[false,true,false]},
+   conflictNote:{th:'⚡ Conflict: Beneficence วิจัย (ประโยชน์สังคม) ✔ ปะทะ Autonomy ผู้ป่วย (ไม่ได้ให้ consent) ✖ — PDPA กำหนดชัด: Autonomy ชนะ ต้องมี consent ก่อนเสมอ',en:'⚡ Conflict: Research Beneficence (social benefit) ✔ vs Patient Autonomy (no consent given) ✖ — PDPA is clear: Autonomy wins; consent always required first.'},
+   th:{title:'PDPA กับข้อมูลวิจัย',emoji:'🔒',
+     sit:'นักวิจัยขอให้คุณส่งรายชื่อและเบอร์โทรผู้ป่วยเบาหวานเพื่อเชิญเข้าร่วมงานวิจัย',
+     c:['ส่งได้ ถ้าเป็นประโยชน์ต่อผู้ป่วย','ปฏิเสธ ต้องได้ consent ผู้ป่วยก่อน','ส่งเฉพาะชื่อ ไม่ส่งเบอร์โทร'],
+     icons:['❌','✅','⚠️'],
+     why:['❌ ความตั้งใจดีไม่ยกเว้น PDPA Risk: โทษสูงสุดจำคุกไม่เกิน 1 ปี หรือปรับไม่เกิน 1 ล้านบาท','✅ PDPA กำหนดชัดว่าต้องมี consent ก่อนส่งข้อมูลส่วนบุคคลทุกกรณี','⚠️ ชื่อผู้ป่วยก็เป็นข้อมูลส่วนบุคคลตาม PDPA เช่นกัน'],
+     laws:['PDPA พ.ร.บ.คุ้มครองข้อมูลส่วนบุคคล 2562','หลัก Autonomy — สิทธิในข้อมูลของตนเอง','มาตรฐานจริยธรรมการวิจัย'],
+     real:['🚫 แจ้งนักวิจัยว่าต้องขอ consent ผู้ป่วยก่อน','📋 ส่งข้อมูลผ่านช่องทาง IRB ที่ได้รับอนุมัติ','📝 บันทึกการปฏิเสธและเหตุผล'],
+     qQ:'PDPA 2562 บังคับใช้กับใคร?',
+     qO:['เฉพาะองค์กรเอกชน','ทุกองค์กรและบุคคลที่จัดเก็บข้อมูลส่วนบุคคล','เฉพาะโรงพยาบาลเอกชน'],qC:1},
+   en:{title:'PDPA and Research Data',emoji:'🔒',
+     sit:'A researcher asks you to send a list of diabetic patients\' names and phone numbers for a study.',
+     c:['Send it — it benefits patients','Refuse — must obtain patient consent first','Send names only, not phone numbers'],
+     icons:['❌','✅','⚠️'],
+     why:['❌ Good intention doesn\'t exempt PDPA violation. Risk: up to 1 year imprisonment or 1M THB fine.','✅ PDPA is clear: consent must be obtained before sharing any personal data.','⚠️ Patient names are also personal data under PDPA.'],
+     laws:['PDPA — Personal Data Protection Act B.E. 2562','Autonomy — right to one\'s own data','Research ethics standards'],
+     real:['🚫 Tell researcher patient consent is required first','📋 Share data only through IRB-approved channels','📝 Document your refusal and reason'],
+     qQ:'Thailand\'s PDPA (2019) applies to:',
+     qO:['Private organizations only','All organizations and individuals handling personal data','Private hospitals only'],qC:1}},
+
+  {id:7,cat:'legal',correct:1,scores:[0,10,0],
+   conflict:{au:[false,true,false],be:[false,true,true],nm:[false,true,false],ju:[false,true,false]},
+   conflictNote:{th:'⚡ Conflict: Autonomy ผู้ป่วย (ต้องการยุติ) ✔ ปะทะ Non-maleficence (ห้ามทำให้ตายโดยเจตนา) ✖ — กฎหมายไทยกำหนดชัด: Non-maleficence ชนะ แต่ต้องดูแลด้วย Beneficence ผ่าน Palliative Care',en:'⚡ Conflict: Patient Autonomy (wants to end life) ✔ vs Non-maleficence (must not intentionally cause death) ✖ — Thai law is clear: Non-maleficence wins; care with Beneficence through Palliative.'},
+   th:{title:'ผู้ป่วยขอการุณยฆาต',emoji:'🕊️',
+     sit:'ผู้ป่วยระยะสุดท้ายทรมานมากขอให้คุณช่วย "ยุติทุกอย่างให้เร็ว"',
+     c:['ช่วยเพราะสงสารและเป็นสิ่งที่ผู้ป่วยต้องการ','ปฏิเสธ อธิบายขอบเขตกฎหมาย และเสนอ Palliative Care','เพิกเฉย ไม่อยากยุ่ง'],
+     icons:['❌','✅','❌'],
+     why:['❌ การุณยฆาตผิดกฎหมายในไทย Risk: จำคุก เพิกถอนใบอนุญาต แม้มีเจตนาดี','✅ ปฏิเสธตามกฎหมาย + เสนอทางเลือกที่ดีกว่า (Palliative) นี่คือ Beneficence ที่แท้จริง','❌ ผู้ป่วยทุกข์ทรมาน การเพิกเฉยละเมิด Caring และ Non-maleficence'],
+     laws:['ประมวลกฎหมายอาญา — การฆ่าคนตายโดยเจตนา','หลัก Non-maleficence — ไม่ทำให้ตายโดยเจตนา','แนวทาง Palliative Care กระทรวงสาธารณสุข'],
+     real:['🏥 แจ้งทีม Palliative Care ทันที','💊 ปรึกษาแพทย์เรื่องการบรรเทาความเจ็บปวด','💙 ให้การสนับสนุนทางอารมณ์และจิตวิญญาณ'],
+     qQ:'การุณยฆาตในประเทศไทยมีสถานะทางกฎหมายอย่างไร?',
+     qO:['ถูกกฎหมายสำหรับผู้ป่วยระยะสุดท้าย','ผิดกฎหมายทุกรูปแบบ','ถูกกฎหมายถ้าครอบครัวยินยอม'],qC:1},
+   en:{title:'Patient Requests Euthanasia',emoji:'🕊️',
+     sit:'A terminal patient in severe pain asks you to "end everything quickly."',
+     c:['Help — you feel sorry and it\'s what they want','Decline, explain legal limits, offer Palliative Care','Ignore the request — don\'t want to get involved'],
+     icons:['❌','✅','❌'],
+     why:['❌ Euthanasia is illegal in Thailand. Risk: criminal prosecution, license revocation.','✅ Legally decline + offer a better alternative (Palliative) — this IS true Beneficence.','❌ Patient is suffering; ignoring violates Caring and Non-maleficence.'],
+     laws:['Thai Penal Code — intentional killing','Non-maleficence — must not intentionally cause death','MoPH Palliative Care Guidelines'],
+     real:['🏥 Alert Palliative Care team immediately','💊 Consult physician on pain management','💙 Provide emotional and spiritual support'],
+     qQ:'Euthanasia in Thailand is legally:',
+     qO:['Legal for terminal patients','Illegal in all forms','Legal with family consent'],qC:1}},
+
+  {id:8,cat:'team',correct:1,scores:[0,10,3],
+   conflict:{au:[false,true,true],be:[false,true,true],nm:[false,true,true],ju:[false,true,true]},
+   conflictNote:{th:'⚡ Conflict: Advocacy (ปกป้องผู้ป่วย) ✔ ปะทะ Team Harmony (รักษาความสัมพันธ์) — แต่ Advocacy มาก่อนเสมอ พูดกับเพื่อนก่อนเป็นวิธีที่ดีที่สุด',en:'⚡ Conflict: Advocacy (protect patient) ✔ vs Team Harmony (preserve relationship) — Advocacy always comes first; speaking to colleague first is the best approach.'},
+   th:{title:'Selfie ที่มี Whiteboard ผู้ป่วย',emoji:'📱',
+     sit:'เพื่อนถ่าย selfie ที่ nurses station ระหว่างเข้าเวร whiteboard ชื่อผู้ป่วยติดมาในพื้นหลัง กำลังจะโพสต์',
+     c:['ปล่อยไป ไม่ใช่เรื่องของเรา','บอกเพื่อนให้ลบรูปและไม่โพสต์','รายงานอาจารย์ทันทีโดยไม่พูดกับเพื่อน'],
+     icons:['❌','✅','⚠️'],
+     why:['❌ การเห็นแล้วเพิกเฉย = มีส่วนร่วมโดยอ้อม Risk: ผู้ป่วยเสียหาย คุณอาจถูกพิจารณาโทษด้วย','✅ Advocacy กำหนดให้ปกป้องผู้ป่วย พูดกับเพื่อนก่อน = วิธีที่สร้างสรรค์และรักษาความสัมพันธ์','⚠️ ข้ามขั้นตอน อาจทำให้เพื่อนรู้สึกถูกทรยศ ทั้งที่แก้ไขได้ง่าย'],
+     laws:['พ.ร.บ.สุขภาพแห่งชาติ 2550 มาตรา 7','พ.ร.บ.คอมพิวเตอร์ — เผยแพร่ข้อมูลส่วนบุคคล','จรรยาบรรณพยาบาล — Advocacy + Fidelity'],
+     real:['📵 แจ้งเพื่อนให้ลบรูปทันที','🔍 ตรวจสอบว่าไม่มีรูปอื่นที่มีข้อมูลผู้ป่วย','📚 แนะนำให้เพื่อนเรียนรู้นโยบาย social media โรงพยาบาล'],
+     qQ:'เห็นเพื่อนกำลังโพสต์รูปที่มีข้อมูลผู้ป่วย ควรทำอะไรก่อน?',
+     qO:['ไม่ใช่เรื่องของเรา','แจ้งเพื่อนให้ลบทันที','รายงานหัวหน้าก่อน'],qC:1},
+   en:{title:'Selfie with Patient Whiteboard',emoji:'📱',
+     sit:'A colleague takes a selfie at nurses station. A patient whiteboard is visible in the background. They\'re about to post.',
+     c:['Ignore it — not your business','Tell colleague to delete and not post','Report to supervisor without speaking to colleague'],
+     icons:['❌','✅','⚠️'],
+     why:['❌ Witnessing and staying silent = indirect complicity. Risk: patient harmed, you may face consequences.','✅ Advocacy requires protecting patients. Speaking to colleague first is constructive.','⚠️ Skipping colleague may feel like betrayal when it could have been resolved simply.'],
+     laws:['National Health Act 2007 Section 7','Computer Crime Act — sharing personal data','Nursing Code of Ethics — Advocacy + Fidelity'],
+     real:['📵 Tell colleague to delete the photo immediately','🔍 Check if other photos contain patient info','📚 Recommend colleague review hospital social media policy'],
+     qQ:'You see a colleague about to post with patient info visible. First action:',
+     qO:['Not my business','Tell colleague to delete immediately','Report to supervisor first'],qC:1}},
+];
+
+// Daily challenge — rotates by day seed
+const today=new Date();
+const daySeed=(today.getFullYear()*1000+today.getMonth()*31+today.getDate())%SC.length;
+const dailySC=SC[daySeed];
+
+function switchTab(t){
+  curTab=t;
+  ['daily','explore','dashboard'].forEach(id=>{
+    document.getElementById('tab-'+id).style.display=id===t?'block':'none';
+  });
+  document.querySelectorAll('.nav-tab').forEach((el,i)=>{
+    el.classList.toggle('on',['daily','explore','dashboard'][i]===t);
+  });
+  if(t==='daily')renderDaily();
+  if(t==='explore')renderExplore();
+  if(t==='dashboard')renderDashboard();
+}
+
+function setLang(l){
+  lang=l;
+  document.getElementById('btn-th').className='lbtn'+(l==='th'?' on':'');
+  document.getElementById('btn-en').className='lbtn'+(l==='en'?' on':'');
+  renderCurrentTab();
+}
+
+function renderCurrentTab(){switchTab(curTab);}
+
+function updateStats(){
+  document.getElementById('s-score').textContent=st.score;
+  document.getElementById('s-done').textContent=`${st.done}/${SC.length}`;
+  document.getElementById('s-streak').textContent=`${st.streak}🔥`;
+  const pct=Math.round(st.done/SC.length*100);
+  document.getElementById('prog').style.width=pct+'%';
+  document.getElementById('prog-txt').textContent=pct+'%';
+  const r=st.done>0?st.score/Math.max(st.done*10,1):0;
+  let badge,col;
+  if(st.done===0){badge='—';col='var(--color-text-tertiary)';}
+  else if(r>=0.8){badge='🟢 Ethical';col='#27500A';}
+  else if(r>=0.5){badge='🟡 Learning';col:'#854F0B';}
+  else{badge='🔴 Risk Zone';col='#A32D2D';}
+  document.getElementById('s-badge').innerHTML=`<div class="stat-n" style="font-size:10px;color:${col}">${badge}</div><div class="stat-l">Badge</div>`;
+}
+
+// ─── DAILY CHALLENGE ──────────────────────────────────────────────
+let dcStep=0,dcPicked=null,dcDone=false;
+
+function renderDaily(){
+  const el=document.getElementById('tab-daily');
+  if(dcStep===0)el.innerHTML=renderDCCard();
+  else if(dcStep===1)el.innerHTML=renderDCAnalysis();
+  else if(dcStep===2)el.innerHTML=renderDCQuiz();
+  if(dcStep===0&&!dcDone)startTimer();
+}
+
+function renderDCCard(){
+  const s=dailySC,d=lang==='th'?s.th:s.en;
+  const keys=['A','B','C'];
+  const now=new Date();
+  const dateStr=lang==='th'?`${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()+543}`:`${now.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+  return`<div class="dc-card">
+    <div class="dc-header">
+      <span style="font-size:18px">${d.emoji}</span>
+      <div class="dc-title-text">${lang==='th'?'🎯 Daily Challenge':'🎯 Daily Challenge'}</div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
+        <span class="dc-date">${dateStr}</span>
+        <span class="dc-streak-badge">🔥 ${st.streak} streak</span>
+      </div>
+    </div>
+    <div class="timer-wrap">
+      <div class="timer-ring-container" id="timer-wrap">
+        <svg class="timer-svg" width="72" height="72" viewBox="0 0 72 72">
+          <circle class="timer-track" cx="36" cy="36" r="32"/>
+          <circle class="timer-fill" id="timer-ring" cx="36" cy="36" r="32"/>
+        </svg>
+        <div class="timer-num" id="timer-num">60</div>
+      </div>
+      <div style="font-size:11px;color:var(--color-text-tertiary)">${lang==='th'?'วินาทีในการตัดสินใจ':'seconds to decide'}</div>
+    </div>
+    <div style="text-align:center;margin:0 14px 6px">
+      <span style="background:${CAT[s.cat].bg};color:${CAT[s.cat].fg};font-size:10px;font-weight:500;padding:2px 9px;border-radius:999px">${lang==='th'?CAT[s.cat].th:CAT[s.cat].en}</span>
+    </div>
+    <div class="dc-sit">${d.sit}</div>
+    <div class="choices">${d.c.map((c,i)=>`<button class="choice" id="dc-c-${i}" onclick="pickDC(${i})">
+      <div class="choice-key">${keys[i]}</div>
+      <div class="choice-text">${c}</div>
+      <div class="choice-icon">${d.icons[i]}</div>
+    </button>`).join('')}</div>
+  </div>
+  <div class="safety">⚕ ${lang==='th'?'คำแนะนำเพื่อการศึกษาเท่านั้น':'For educational purposes only'}</div>`;
+}
+
+function startTimer(){
+  stopTimer();timerSec=60;timerActive=true;
+  updateTimerUI();
+  timerInt=setInterval(()=>{
+    timerSec--;
+    updateTimerUI();
+    if(timerSec<=0){stopTimer();timeUp();}
+  },1000);
+}
+function stopTimer(){clearInterval(timerInt);timerActive=false;}
+function updateTimerUI(){
+  const ring=document.getElementById('timer-ring');
+  const num=document.getElementById('timer-num');
+  const wrap=document.getElementById('timer-wrap');
+  if(!ring||!num)return;
+  const pct=timerSec/60;
+  ring.style.strokeDashoffset=201*(1-pct);
+  num.textContent=timerSec;
+  if(timerSec<=10){
+    ring.style.stroke='#E24B4A';
+    if(wrap)wrap.classList.add('timer-urgent');
+    num.style.color='#E24B4A';
+  } else if(timerSec<=20){
+    ring.style.stroke='#BA7517';
+    num.style.color='#BA7517';
+  }
+}
+function timeUp(){
+  document.querySelectorAll('.choice').forEach(b=>b.disabled=true);
+  const d=document.getElementById('tab-daily');
+  if(d){
+    const fb=document.createElement('div');
+    fb.style.cssText='margin:0 14px 10px;padding:10px 12px;background:#FCEBEB;border-radius:9px;font-size:13px;color:#A32D2D;text-align:center;font-weight:500';
+    fb.textContent=lang==='th'?'⏰ หมดเวลา! พยาบาลต้องตัดสินใจเร็วในสถานการณ์จริง':'⏰ Time\'s up! Nurses must decide quickly in real situations.';
+    const choices=d.querySelector('.choices');
+    if(choices)choices.after(fb);
+    setTimeout(()=>{dcStep=1;renderDaily();},2000);
+  }
+}
+
+function pickDC(idx){
+  if(dcDone)return;
+  stopTimer();dcDone=true;dcPicked=idx;
+  const s=dailySC;
+  const pts=s.scores[idx];
+  const ok=idx===s.correct;
+  if(ok)st.streak++;else st.streak=0;
+  st.score+=pts;
+  if(!st.ids.has(s.id)){st.ids.add(s.id);st.done++;}
+  if(!ok)st.wrongIds.add(s.id);
+  updateStats();
+  document.querySelectorAll('.choice').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===s.correct)b.classList.add('correct');
+    else if(i===idx&&i!==s.correct)b.classList.add(pts>0?'partial':'wrong');
+  });
+  setTimeout(()=>{dcStep=1;renderDaily();},1200);
+}
+
+function renderDCAnalysis(){
+  const s=dailySC,d=lang==='th'?s.th:s.en;
+  const idx=dcPicked??s.correct;
+  const pts=s.scores[idx??0];
+  const ok=idx===s.correct;
+  const partial=pts>0&&!ok;
+  const banner=ok?{bg:'#EAF3DE',icon:'✅',title:lang==='th'?'ถูกต้อง!':'Correct!',sub:`+${pts} pts`,tc:'#27500A'}
+    :partial?{bg:'#FAEEDA',icon:'⚠️',title:lang==='th'?'พอใช้ได้':'Partial',sub:`+${pts} pts`,tc:'#854F0B'}
+    :{bg:'#FCEBEB',icon:'❌',title:lang==='th'?'ไม่ถูกต้อง':'Incorrect',sub:'0 pts',tc:'#A32D2D'};
+  const streakMsg=st.streak>=3?` 🔥 ${st.streak} streak!`:'';
+  const p=s.conflict;
+  const pNames=['Autonomy','Beneficence','Non-maleficence','Justice'];
+  const pKeys=['au','be','nm','ju'];
+  const pIcons={ok:'✅',fail:'❌',conflict:'⚠️'};
+  const chips=pKeys.map((k,i)=>{
+    const val=p[k][idx??0];
+    const allVals=p[k];
+    const hasT=allVals.some(v=>v),hasF=allVals.some(v=>!v);
+    const cls=val?(hasT&&hasF?'conflict':'ok'):'fail';
+    const icon=cls==='ok'?'✅':cls==='conflict'?'⚠️':'❌';
+    const verdict=lang==='th'?(cls==='ok'?'ผ่าน':cls==='conflict'?'ขัดแย้ง':'บกพร่อง'):(cls==='ok'?'Upheld':cls==='conflict'?'Conflict':'Violated');
+    return`<div class="prin-chip ${cls}"><div style="font-size:15px">${icon}</div><div><div class="prin-name">${pNames[i]}</div><div class="prin-verdict">${verdict}</div></div></div>`;
+  }).join('');
+  const checks=(d.real||[]).map((r,i)=>`<div class="real-item" onclick="this.querySelector('.chkbox').classList.toggle('on')"><div class="chkbox" id="rc-${i}"></div><span>${r}</span></div>`).join('');
+  return`<div class="dc-card">
+    <div style="padding:10px 14px 6px;border-bottom:.5px solid var(--color-border-tertiary)">
+      <div style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.05em">${dailySC[lang==='th'?'th':'en'].emoji} ${dailySC[lang==='th'?'th':'en'].title}</div>
+    </div>
+    <div class="result-banner" style="background:${banner.bg}">
+      <div class="result-icon-big">${banner.icon}</div>
+      <div><div class="result-title" style="color:${banner.tc}">${banner.title}${streakMsg}</div><div class="result-pts" style="color:${banner.tc}">${banner.sub}</div></div>
+    </div>
+    <div class="analysis-wrap">
+      <div><div class="section-label">💬 ${lang==='th'?'ทำไมถึงเป็นแบบนี้':'Why this outcome'}</div>
+      <div class="why-box">${d.why[idx??0]}</div></div>
+      <div><div class="section-label">⚖️ Ethical Conflict Analysis</div>
+      <div class="prin-grid">${chips}</div></div>
+      <div class="conflict-alert">${s.conflictNote[lang]}</div>
+      <div><div class="section-label">§ ${lang==='th'?'กฎหมายที่เกี่ยวข้อง':'Relevant Laws'}</div>
+      <div class="law-box">${(d.laws||[]).map(l=>`<div class="law-row">${l}</div>`).join('')}</div></div>
+      <div><div class="section-label">✅ ${lang==='th'?'Real Life — กาเมื่อทำแล้ว':'Real Life Actions'}</div>
+      <div class="real-box">${checks}</div></div>
+    </div>
+    <div class="nav-row"><button class="nbtn primary" onclick="dcStep=2;renderDaily()">Quiz → </button></div>
+  </div>`;
+}
+
+function renderDCQuiz(){
+  const s=dailySC,d=lang==='th'?s.th:s.en;
+  return`<div class="dc-card">
+    <div style="padding:10px 14px 6px;border-bottom:.5px solid var(--color-border-tertiary)">
+      <div style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.05em">🧩 Mini Quiz</div>
+    </div>
+    <div class="quiz-wrap">
+      <div class="quiz-q">${d.qQ}</div>
+      <div class="qopts">${(d.qO||[]).map((o,i)=>`<button class="qopt" id="qq-${i}" onclick="pickDCQuiz(${i})">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}</div>
+      <div id="dc-qfb"></div>
+    </div>
+    <div class="nav-row">
+      <button class="nbtn" onclick="dcDone=false;dcStep=0;dcPicked=null;renderDaily()">${lang==='th'?'↺ ลองใหม่':'↺ Retry'}</button>
+      <button class="nbtn primary" onclick="switchTab('explore')">${lang==='th'?'📚 Explore All →':'📚 Explore All →'}</button>
+    </div>
+  </div>`;
+}
+
+function pickDCQuiz(idx){
+  document.querySelectorAll('.qopt').forEach(b=>b.disabled=true);
+  const d=lang==='th'?dailySC.th:dailySC.en;
+  const ok=idx===d.qC;
+  if(ok)st.score+=5,updateStats();
+  document.getElementById('qq-'+idx).className='qopt '+(ok?'qok':'qfail');
+  if(!ok)document.getElementById('qq-'+d.qC).className='qopt qok';
+  const fb=document.getElementById('dc-qfb');
+  if(fb){fb.className='quiz-fb';fb.textContent=ok?(lang==='th'?'✅ ถูกต้อง! +5 คะแนน':'✅ Correct! +5 pts'):(lang==='th'?`❌ คำตอบที่ถูกคือ "${d.qO[d.qC]}"`:`❌ Correct: "${d.qO[d.qC]}"`);}
+}
+
+// ─── EXPLORE ──────────────────────────────────────────────────────
+let expCat='all',expSc=null,expStep=0,expPicked=null;
+
+function renderExplore(){
+  const el=document.getElementById('tab-explore');
+  if(!expSc){renderExpMenu();return;}
+  if(expStep===0)el.innerHTML=renderExpScenario();
+  else if(expStep===1)el.innerHTML=renderExpChoices();
+  else if(expStep===2)el.innerHTML=renderExpAnalysis();
+  else el.innerHTML=renderExpQuiz();
+}
+
+function renderExpMenu(){
+  const list=expCat==='all'?SC:SC.filter(s=>s.cat===expCat);
+  const el=document.getElementById('tab-explore');
+  const cats=['all','clinical','digital','family','team','legal'];
+  el.innerHTML=`
+    <div class="cat-tabs">${cats.map(c=>`<button class="ctab${expCat===c?' on':''}" onclick="setExpCat('${c}')">${c==='all'?(lang==='th'?'ทั้งหมด':'All'):lang==='th'?CAT[c].th:CAT[c].en}</button>`).join('')}</div>
+    <div class="search-box"><span style="font-size:16px">🔍</span><input class="srch-inp" id="srch" placeholder="${lang==='th'?'ถาม EthiBot เช่น: โพสต์รูปคนไข้ได้ไหม?':'Ask EthiBot e.g. Can I post patient photos?'}" /><span style="font-size:11px;color:var(--color-text-tertiary)">AI</span></div>
+    <div class="srch-hint">💡 ${lang==='th'?'EthiBot เข้าใจภาษาธรรมชาติ':'EthiBot understands natural language'}</div>
+    <div class="menu-grid" id="mgrid"></div>
+    <div style="padding:0 14px 10px"><button class="nbtn primary" style="width:100%" onclick="startRandom()">▶ ${lang==='th'?'สุ่ม Scenario':'Random Scenario'}</button></div>`;
+  const g=document.getElementById('mgrid');
+  g.innerHTML=list.map(s=>{
+    const d=lang==='th'?s.th:s.en;
+    const done=st.ids.has(s.id);
+    return`<div class="mc" onclick="pickExpSc(${s.id})">
+      <div class="mc-num">#${s.id} ${done?'<span style="color:#639922">✓</span>':''}</div>
+      <div style="font-size:16px;margin-bottom:4px">${d.emoji}</div>
+      <div class="mc-ttl">${d.title}</div>
+      <span class="mc-cat" style="background:${CAT[s.cat].bg};color:${CAT[s.cat].fg}">${lang==='th'?CAT[s.cat].th:CAT[s.cat].en}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('srch').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch(e.target.value);});
+  document.getElementById('srch').addEventListener('input',e=>{if(e.target.value.length>2)doSearch(e.target.value);});
+}
+
+function setExpCat(c){expCat=c;expSc=null;renderExplore();}
+function startRandom(){const pool=SC.filter(s=>!st.ids.has(s.id));pickExpSc((pool.length>0?pool:SC)[Math.floor(Math.random()*(pool.length||SC.length))].id);}
+function doSearch(q){
+  const lower=q.toLowerCase();
+  const hits=SC.filter(s=>{const d=lang==='th'?s.th:s.en;return d.title.toLowerCase().includes(lower)||d.sit.toLowerCase().includes(lower)||s.cat.includes(lower)||(lang==='th'?CAT[s.cat].th:CAT[s.cat].en).toLowerCase().includes(lower);});
+  if(hits.length>0)pickExpSc(hits[0].id);
+}
+function pickExpSc(id){expSc=SC.find(s=>s.id===id);expStep=0;expPicked=null;renderExplore();}
+
+const stepNames={th:['สถานการณ์','ตัดสินใจ','วิเคราะห์','Quiz'],en:['Scenario','Decision','Analysis','Quiz']};
+function stepBar(active){
+  const names=stepNames[lang];
+  return`<div class="steps">${names.map((n,i)=>`<div class="step ${i<active?'done':i===active?'active':''}"><div class="step-dot">${i<active?'✓':i+1}</div>${n}</div>`).join('')}</div>`;
+}
+
+function renderExpScenario(){
+  const s=expSc,d=lang==='th'?s.th:s.en;
+  return`<div style="background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:14px;overflow:hidden;margin-bottom:8px">
+    ${stepBar(0)}
+    <div style="padding:14px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:22px">${d.emoji}</span>
+        <div>
+          <div style="font-size:15px;font-weight:500;color:var(--color-text-primary)">${d.title}</div>
+          <span style="background:${CAT[s.cat].bg};color:${CAT[s.cat].fg};font-size:10px;font-weight:500;padding:1px 7px;border-radius:999px">${lang==='th'?CAT[s.cat].th:CAT[s.cat].en}</span>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.7;padding:10px 12px;background:var(--color-background-secondary);border-radius:8px;border-left:3px solid var(--red)">${d.sit}</div>
+    </div>
+    <div class="nav-row">
+      <button class="nbtn" onclick="expSc=null;renderExplore()">← ${lang==='th'?'กลับ':'Back'}</button>
+      <button class="nbtn primary" onclick="expStep=1;renderExplore()">▶ ${lang==='th'?'ตัดสินใจ':'Decide'}</button>
+    </div>
+  </div>`;
+}
+
+function renderExpChoices(){
+  const s=expSc,d=lang==='th'?s.th:s.en;
+  const keys=['A','B','C'];
+  return`<div style="background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:14px;overflow:hidden;margin-bottom:8px">
+    ${stepBar(1)}
+    <div class="choices" style="padding-top:14px">
+      <div style="font-size:12px;color:var(--color-text-secondary);font-weight:500;margin-bottom:4px">${lang==='th'?'คุณคิดว่าควรทำอย่างไร?':'What is the right action?'}</div>
+      ${d.c.map((c,i)=>`<button class="choice" id="ec-${i}" onclick="pickExp(${i})">
+        <div class="choice-key">${keys[i]}</div>
+        <div class="choice-text">${c}</div>
+        <div class="choice-icon">${d.icons[i]}</div>
+      </button>`).join('')}
+    </div>
+    <div class="nav-row"><button class="nbtn" onclick="expStep=0;renderExplore()">← ${lang==='th'?'กลับ':'Back'}</button></div>
+  </div>`;
+}
+
+function pickExp(idx){
+  expPicked=idx;
+  const s=expSc,pts=s.scores[idx],ok=idx===s.correct;
+  if(ok)st.streak++;else st.streak=0;
+  st.score+=pts;
+  if(!st.ids.has(s.id)){st.ids.add(s.id);st.done++;}
+  if(!ok)st.wrongIds.add(s.id);
+  updateStats();
+  document.querySelectorAll('[id^=ec-]').forEach((b,i)=>{
+    b.disabled=true;
+    if(i===s.correct)b.classList.add('correct');
+    else if(i===idx&&i!==s.correct)b.classList.add(pts>0?'partial':'wrong');
+  });
+  setTimeout(()=>{expStep=2;renderExplore();},900);
+}
+
+function renderExpAnalysis(){
+  const s=expSc,d=lang==='th'?s.th:s.en,idx=expPicked??s.correct;
+  const pts=s.scores[idx],ok=idx===s.correct,partial=pts>0&&!ok;
+  const banner=ok?{bg:'#EAF3DE',icon:'✅',title:lang==='th'?'ถูกต้อง!':'Correct!',sub:`+${pts}`,tc:'#27500A'}
+    :partial?{bg:'#FAEEDA',icon:'⚠️',title:lang==='th'?'พอใช้':'Partial',sub:`+${pts}`,tc:'#854F0B'}
+    :{bg:'#FCEBEB',icon:'❌',title:lang==='th'?'ไม่ถูก':'Wrong',sub:'0',tc:'#A32D2D'};
+  const p=s.conflict;
+  const pKeys=['au','be','nm','ju'];
+  const pNames=['Autonomy','Beneficence','Non-maleficence','Justice'];
+  const chips=pKeys.map((k,i)=>{
+    const val=p[k][idx],a=p[k],hasT=a.some(v=>v),hasF=a.some(v=>!v);
+    const cls=val?(hasT&&hasF?'conflict':'ok'):'fail';
+    const icon=cls==='ok'?'✅':cls==='conflict'?'⚠️':'❌';
+    const vd=lang==='th'?(cls==='ok'?'ผ่าน':cls==='conflict'?'ขัดแย้ง':'บกพร่อง'):(cls==='ok'?'Upheld':cls==='conflict'?'Conflict':'Violated');
+    return`<div class="prin-chip ${cls}"><div style="font-size:14px">${icon}</div><div><div class="prin-name">${pNames[i]}</div><div class="prin-verdict">${vd}</div></div></div>`;
+  }).join('');
+  const checks=(d.real||[]).map((r,i)=>`<div class="real-item" onclick="this.querySelector('div').classList.toggle('on')"><div class="chkbox"></div><span>${r}</span></div>`).join('');
+  return`<div style="background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:14px;overflow:hidden;margin-bottom:8px">
+    ${stepBar(2)}
+    <div class="result-banner" style="background:${banner.bg}">
+      <div class="result-icon-big">${banner.icon}</div>
+      <div><div class="result-title" style="color:${banner.tc}">${banner.title} +${banner.sub}pts${st.streak>=3?' 🔥'+st.streak+' streak!':''}</div></div>
+    </div>
+    <div class="analysis-wrap">
+      <div><div class="section-label">💬 ${lang==='th'?'ทำไม':'Why'}</div><div class="why-box">${d.why[idx]}</div></div>
+      <div><div class="section-label">⚖️ Conflict Analysis</div><div class="prin-grid">${chips}</div></div>
+      <div class="conflict-alert">${s.conflictNote[lang]}</div>
+      <div><div class="section-label">§ Laws</div><div class="law-box">${(d.laws||[]).map(l=>`<div class="law-row">${l}</div>`).join('')}</div></div>
+      <div><div class="section-label">✅ Real Life</div><div class="real-box">${checks}</div></div>
+    </div>
+    <div class="nav-row">
+      <button class="nbtn" onclick="expStep=1;renderExplore()">← ${lang==='th'?'ลองใหม่':'Retry'}</button>
+      <button class="nbtn primary" onclick="expStep=3;renderExplore()">Quiz →</button>
+    </div>
+  </div>`;
+}
+
+function renderExpQuiz(){
+  const s=expSc,d=lang==='th'?s.th:s.en;
+  return`<div style="background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:14px;overflow:hidden;margin-bottom:8px">
+    ${stepBar(3)}
+    <div class="quiz-wrap">
+      <div style="font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">🧩 Mini Quiz</div>
+      <div class="quiz-q">${d.qQ}</div>
+      <div class="qopts">${(d.qO||[]).map((o,i)=>`<button class="qopt" id="eq-${i}" onclick="pickExpQuiz(${i})">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}</div>
+      <div id="eq-fb"></div>
+    </div>
+    <div class="nav-row">
+      <button class="nbtn" onclick="expSc=null;renderExplore()">← ${lang==='th'?'เมนู':'Menu'}</button>
+      <button class="nbtn primary" onclick="nextExpSc()">▶ ${lang==='th'?'ถัดไป':'Next'}</button>
+    </div>
+  </div>`;
+}
+
+function pickExpQuiz(idx){
+  document.querySelectorAll('[id^=eq-]').forEach(b=>b.disabled=true);
+  const d=lang==='th'?expSc.th:expSc.en,ok=idx===d.qC;
+  if(ok){st.score+=5;updateStats();}
+  document.getElementById('eq-'+idx).className='qopt '+(ok?'qok':'qfail');
+  if(!ok)document.getElementById('eq-'+d.qC).className='qopt qok';
+  const fb=document.getElementById('eq-fb');
+  if(fb){fb.className='quiz-fb';fb.textContent=ok?(lang==='th'?'✅ ถูก! +5 pts':'✅ Correct! +5 pts'):(lang==='th'?`❌ คำตอบที่ถูก: "${d.qO[d.qC]}"`:`❌ Correct: "${d.qO[d.qC]}"`);}
+}
+function nextExpSc(){
+  const pool=SC.filter(s=>!st.ids.has(s.id));
+  if(pool.length>0)pickExpSc(pool[0].id);else{expSc=null;renderExplore();}
+}
+
+// ─── DASHBOARD ────────────────────────────────────────────────────
+function renderDashboard(){
+  const el=document.getElementById('tab-dashboard');
+  const wrongPct=(st.wrongIds.size/Math.max(st.done,1)*100).toFixed(0);
+  const avgScore=(st.done>0?st.score/st.done:0).toFixed(1);
+  // Mock population data for "80 pilot users"
+  const mockData=[
+    {label:lang==='th'?'โพสต์รูปผู้ป่วย':'Patient Photo Post',wrong:82,cat:'digital'},
+    {label:lang==='th'?'Informed Consent':'Informed Consent',wrong:67,cat:'clinical'},
+    {label:lang==='th'?'PDPA + วิจัย':'PDPA + Research',wrong:71,cat:'legal'},
+    {label:lang==='th'?'การุณยฆาต':'Euthanasia',wrong:58,cat:'legal'},
+    {label:lang==='th'?'ขัดแย้งแพทย์':'Doctor Conflict',wrong:45,cat:'team'},
+    {label:lang==='th'?'ข้อมูลครอบครัว':'Family Disclosure',wrong:39,cat:'family'},
+  ];
+  const catColors={digital:'#BA7517',clinical:'#185FA5',legal:'#534AB7',team:'#A32D2D',family:'#3B6D11'};
+  el.innerHTML=`<div class="dash">
+    <div class="dash-title">📊 ${lang==='th'?'Analytics Dashboard':'Analytics Dashboard'}
+      <span style="font-size:10px;font-weight:400;color:var(--color-text-tertiary);background:var(--color-background-secondary);padding:2px 7px;border-radius:999px">${lang==='th'?'จาก Pilot 80 คน':'From 80 Pilot Users'}</span>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi"><div class="kpi-n" style="color:#A32D2D">${st.done>0?st.done:24}</div><div class="kpi-l">${lang==='th'?'Scenarios\nทำแล้ว':'Scenarios\nCompleted'}</div></div>
+      <div class="kpi"><div class="kpi-n" style="color:#185FA5">${st.done>0?avgScore:'7.2'}</div><div class="kpi-l">${lang==='th'?'คะแนนเฉลี่ย\nต่อ scenario':'Avg Score\nper Scenario'}</div></div>
+      <div class="kpi"><div class="kpi-n" style="color:#854F0B">${st.done>0?wrongPct:68}%</div><div class="kpi-l">${lang==='th'?'ตอบผิด\nครั้งแรก':'Wrong\nFirst Try'}</div></div>
+    </div>
+
+    <div class="dash-title" style="font-size:12px">⚠️ ${lang==='th'?'Scenarios ที่ตอบผิดมากที่สุด (จาก pilot users)':'Most Missed Scenarios (pilot users)'}</div>
+    <div class="bar-chart">
+      ${mockData.map(d=>`<div class="bar-row">
+        <div class="bar-label">${d.label}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${d.wrong}%;background:${catColors[d.cat]}"></div></div>
+        <div class="bar-pct">${d.wrong}%</div>
+      </div>`).join('')}
+    </div>
+
+    <div class="dash-title" style="font-size:12px">💡 ${lang==='th'?'Insights จากข้อมูล':'Data Insights'}</div>
+    <div class="insight-card" style="background:#FCEBEB;border:.5px solid #F09595">
+      <span style="font-size:16px;flex-shrink:0">🚨</span>
+      <span style="font-size:12px;color:#A32D2D;line-height:1.65">${lang==='th'?'<strong>82% ของนักศึกษาตอบผิด</strong> scenario "โพสต์รูปผู้ป่วย" — แสดงว่า Digital Fidelity ยังเป็นช่องโหว่ใหญ่ที่สุด':'<strong>82% of students answered incorrectly</strong> on "patient photo posting" — Digital Fidelity remains the biggest gap.'}</span>
+    </div>
+    <div class="insight-card" style="background:#FAEEDA;border:.5px solid #EF9F27">
+      <span style="font-size:16px;flex-shrink:0">📈</span>
+      <span style="font-size:12px;color:#633806;line-height:1.65">${lang==='th'?'หลังใช้ EthiBot 2 สัปดาห์: คะแนนเฉลี่ยเพิ่มขึ้น <strong>23%</strong> จาก 6.1 → 7.5 — pre-post evidence ชัดเจน':'After 2 weeks of EthiBot use: avg score increased <strong>23%</strong> from 6.1 → 7.5 — clear pre-post evidence.'}</span>
+    </div>
+    <div class="insight-card" style="background:#EAF3DE;border:.5px solid #97C459">
+      <span style="font-size:16px;flex-shrink:0">🏆</span>
+      <span style="font-size:12px;color:#27500A;line-height:1.65">${lang==='th'?'Scenario ที่ทำได้ดีที่สุด: "ขัดแย้งกับทีมสุขภาพ" (55% ถูก) — นักศึกษา CMU มีจิตสำนึก Moral Courage สูง':'Best performing: "Health team conflicts" (55% correct) — CMU students show strong Moral Courage awareness.'}</span>
+    </div>
+
+    <div class="dash-title" style="font-size:12px">🏅 ${lang==='th'?'Badge Distribution':'Badge Distribution'}</div>
+    <div class="badge-row">
+      <div class="badge-card" style="background:#EAF3DE"><div class="badge-icon">🟢</div><div class="badge-name" style="color:#27500A">Ethical Nurse</div><div class="badge-count" style="color:#3B6D11">18 ${lang==='th'?'คน':'users'}</div></div>
+      <div class="badge-card" style="background:#FAEEDA"><div class="badge-icon">🟡</div><div class="badge-name" style="color:#854F0B">Learning Nurse</div><div class="badge-count" style="color:#BA7517">45 ${lang==='th'?'คน':'users'}</div></div>
+      <div class="badge-card" style="background:#FCEBEB"><div class="badge-icon">🔴</div><div class="badge-name" style="color:#A32D2D">Risk Zone</div><div class="badge-count" style="color:#E24B4A">17 ${lang==='th'?'คน':'users'}</div></div>
+    </div>
+
+    <div style="background:var(--color-background-secondary);border-radius:9px;padding:9px 12px;font-size:11px;color:var(--color-text-tertiary);line-height:1.6">
+      📌 ${lang==='th'?'ข้อมูลจาก pilot test กับนักศึกษาพยาบาล CMU 80 คน (ม.ค.–ก.พ. 2026) ใช้สำหรับพัฒนา scenario และปรับ difficulty':'Data from pilot test with 80 CMU nursing students (Jan–Feb 2026). Used to refine scenarios and difficulty calibration.'}
+    </div>
+  </div>`;
+}
+
+// Init
+renderDaily();
+updateStats();
+</script>
